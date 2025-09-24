@@ -114,5 +114,48 @@ public class ProductServiceTest {
         Set<ConstraintViolation<Product>> violations_invalid = validator.validate(productWithTwoCharTitle);
         // Assert
         assertEquals("title", violations_invalid.iterator().next().getPropertyPath().toString());
+
+        //Invalid case Title > 100 char
+        Product productWith101CharTitle = createProductSample(
+            1L,
+            "N".repeat(101),
+            null,
+            null,
+            1,
+            1,
+            null,
+            BigDecimal.TEN,
+            ProductStatus.IN_STOCK,
+            null,
+            Instant.now()
+        );
+        Set<ConstraintViolation<Product>> violations_invalid2 = validator.validate(productWith101CharTitle);
+        // Assert
+        assertEquals("title", violations_invalid2.iterator().next().getPropertyPath().toString());
+
+        //Invalid case Title > 101 char and Description < 50 char
+        Product productWith101CharTitleAndShortDescription = createProductSample(
+            1L,
+            "N".repeat(101),
+            null,
+            "Short",
+            1,
+            1,
+            null,
+            BigDecimal.TEN,
+            ProductStatus.IN_STOCK,
+            null,
+            Instant.now()
+        );
+        Set<ConstraintViolation<Product>> violations_invalid3 = validator.validate(productWith101CharTitleAndShortDescription);
+        System.out.println("Violations for productWith101CharTitleAndShortDescription:");
+        System.out.println(violations_invalid3.toString());
+
+        // Assert
+        assertEquals(2, violations_invalid3.size());
+        // Verifica se há violação para "title"
+        assertTrue(violations_invalid3.stream().anyMatch(v -> v.getPropertyPath().toString().equals("title")));
+        // Verifica se há violação para "description"
+        assertTrue(violations_invalid3.stream().anyMatch(v -> v.getPropertyPath().toString().equals("description")));
     }
 }
